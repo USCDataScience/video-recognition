@@ -18,7 +18,7 @@
 from extract_images import store_center_image
 import os
 import sys
-
+import requests
 
 if __name__ == '__main__':    
     if len(sys.argv) < 4:
@@ -47,12 +47,19 @@ if __name__ == '__main__':
         print "Stored images from videos"
         video_image_option = "i"
         ip_dir_path = out_path
-        
+    
+    result = {}
     if "i" == video_image_option:
         '''
         Call tika to get image labels
         '''
         for f in os.listdir(ip_dir_path):
-            print ip_dir_path+"/"+f
+            if f[-3:] != "jpg":
+                continue
+
+            response = requests.post("http://localhost:8764/inception/v3/classify?topk=3", data=open(ip_dir_path+"/"+f, 'rb'))
             
+            result[f] = response.json()["classnames"]
+
+
             
