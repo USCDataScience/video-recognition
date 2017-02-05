@@ -19,7 +19,8 @@ from extract_images import store_center_image
 import os
 import sys
 import requests
-
+import json
+    
 if __name__ == '__main__':    
     if len(sys.argv) < 4:
         print "Usage - "
@@ -56,10 +57,16 @@ if __name__ == '__main__':
         for f in os.listdir(ip_dir_path):
             if f[-3:] != "jpg":
                 continue
+            try:
+                response = requests.post("http://localhost:8764/inception/v3/classify?topk=3", data=open(ip_dir_path+"/"+f, 'rb'))
+                result[f] = response.json()["classnames"]
+            except:
+                print "Exception for”, f
+                pass
 
-            response = requests.post("http://localhost:8764/inception/v3/classify?topk=3", data=open(ip_dir_path+"/"+f, 'rb'))
-            
-            result[f] = response.json()["classnames"]
+
+    with open('result.txt', 'w') as outfile:
+       json.dump(result,outfile)
 
 
-            
+    
